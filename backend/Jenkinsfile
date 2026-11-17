@@ -29,21 +29,37 @@ pipeline {
             }
         }
 
-        stage('Build and Test') {
-            steps {
-                dir('backend') {
-                    bat 'gradlew.bat clean test'
-                }
-            }
-            post {
-                always {
-                    junit(
-                        testResults: 'backend/build/test-results/test/*.xml',
-                        allowEmptyResults: false
-                    )
-                }
-            }
-        }
+       stage('Build and Test') {
+           steps {
+               withCredentials([
+                   string(
+                       credentialsId: 'connectly-db-username',
+                       variable: 'DB_USERNAME'
+                   ),
+                   string(
+                       credentialsId: 'connectly-db-password',
+                       variable: 'DB_PASSWORD'
+                   ),
+                   string(
+                       credentialsId: 'connectly-jwt-secret',
+                       variable: 'JWT_SECRET'
+                   )
+               ]) {
+                   dir('backend') {
+                       bat 'gradlew.bat clean test'
+                   }
+               }
+           }
+
+           post {
+               always {
+                   junit(
+                       testResults: 'backend/build/test-results/test/*.xml',
+                       allowEmptyResults: false
+                   )
+               }
+           }
+       }
 
         stage('JaCoCo Coverage Verification') {
             steps {
@@ -65,7 +81,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('ConnectlySonarQube') {
                     dir('backend') {
-                        bat 'gradlew.bat sonar -Dsonar.token=%SONAR_AUTH_TOKEN%'
+                        bat 'gradlew.bat sonar --stacktrace --info -Dsonar.scanner.skipJreProvisioning=true -Dsonar.token=%SONAR_AUTH_TOKEN%'
                     }
                 }
             }
