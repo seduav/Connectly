@@ -1,3 +1,37 @@
+def setGitHubCommitStatus(String message, String state) {
+    step([
+        $class: 'GitHubCommitStatusSetter',
+
+        reposSource: [
+            $class: 'AnyDefinedRepositorySource'
+        ],
+
+        commitShaSource: [
+            $class: 'BuildDataRevisionShaSource'
+        ],
+
+        contextSource: [
+            $class: 'ManuallyEnteredCommitContextSource',
+            context: 'Connectly CI Pipeline'
+        ],
+
+        errorHandlers: [
+            [$class: 'ShallowAnyErrorHandler']
+        ],
+
+        statusResultSource: [
+            $class: 'ConditionalStatusResultSource',
+            results: [
+                [
+                    $class: 'AnyBuildResult',
+                    message: message,
+                    state: state
+                ]
+            ]
+        ]
+    ])
+}
+
 pipeline {
     agent any
 
@@ -22,6 +56,17 @@ pipeline {
             }
         }
 
+        stage('Notify GitHub - Build Started') {
+            steps {
+                script {
+                    setGitHubCommitStatus(
+                        'Jenkins pipeline is running.',
+                        'PENDING'
+                    )
+                }
+            }
+        }
+
         stage('Verify Environment') {
             steps {
                 bat 'java -version'
@@ -29,37 +74,37 @@ pipeline {
             }
         }
 
-       stage('Build and Test') {
-           steps {
-               withCredentials([
-                   string(
-                       credentialsId: 'connectly-db-username',
-                       variable: 'DB_USERNAME'
-                   ),
-                   string(
-                       credentialsId: 'connectly-db-password',
-                       variable: 'DB_PASSWORD'
-                   ),
-                   string(
-                       credentialsId: 'connectly-jwt-secret',
-                       variable: 'JWT_SECRET'
-                   )
-               ]) {
-                   dir('backend') {
-                       bat 'gradlew.bat clean test'
-                   }
-               }
-           }
+        stage('Build and Test') {
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'connectly-db-username',
+                        variable: 'DB_USERNAME'
+                    ),
+                    string(
+                        credentialsId: 'connectly-db-password',
+                        variable: 'DB_PASSWORD'
+                    ),
+                    string(
+                        credentialsId: 'connectly-jwt-secret',
+                        variable: 'JWT_SECRET'
+                    )
+                ]) {
+                    dir('backend') {
+                        bat 'gradlew.bat clean test'
+                    }
+                }
+            }
 
-           post {
-               always {
-                   junit(
-                       testResults: 'backend/build/test-results/test/*.xml',
-                       allowEmptyResults: false
-                   )
-               }
-           }
-       }
+            post {
+                always {
+                    junit(
+                        testResults: 'backend/build/test-results/test/*.xml',
+                        allowEmptyResults: false
+                    )
+                }
+            }
+        }
 
         stage('JaCoCo Coverage Verification') {
             steps {
@@ -67,6 +112,7 @@ pipeline {
                     bat 'gradlew.bat jacocoTestCoverageVerification'
                 }
             }
+
             post {
                 always {
                     archiveArtifacts(
@@ -107,10 +153,35 @@ pipeline {
     post {
         success {
             echo 'Connectly CI pipeline completed successfully.'
+
+            script {
+                setGitHubCommitStatus(
+                    'Build, tests, coverage and SonarQube quality gate passed.',
+                    'SUCCESS'
+                )
+            }
         }
 
         failure {
             echo 'Connectly CI pipeline failed. Check the stage logs.'
+
+            script {
+                setGitHubCommitStatus(
+                    'Build or quality checks failed. Check Jenkins logs.',
+                    'FAILURE'
+                )
+            }
+        }
+
+        aborted {
+            echo 'Connectly CI pipeline was aborted.'
+
+            script {
+                setGitHubCommitStatus(
+                    'Jenkins pipeline was aborted.',
+                    'ERROR'
+                )
+            }
         }
 
         always {
@@ -118,3 +189,4 @@ pipeline {
         }
     }
 }
+
