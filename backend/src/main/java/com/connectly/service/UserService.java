@@ -5,6 +5,8 @@ import com.connectly.dto.request.RegistrationRequest;
 import com.connectly.dto.response.ProfileResponse;
 import com.connectly.dto.response.RegistrationResponse;
 import com.connectly.dto.response.UserResponse;
+import com.connectly.dto.response.CurrentUserResponse;
+import com.connectly.dto.response.UserSuggestionResponse;
 import com.connectly.enums.Role;
 
 import java.util.List;
@@ -36,5 +38,12 @@ public interface UserService {
     void updateUserRole(Long userId, Role role);
 
     void deleteUser(Long userId);
+
+    CurrentUserResponse getCurrentUser(String email);
+
+    List<UserSuggestionResponse> getRandomUsers(
+            String currentUserEmail,
+            int limit
+    );
 }
 

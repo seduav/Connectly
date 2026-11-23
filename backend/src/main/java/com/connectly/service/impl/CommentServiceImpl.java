@@ -16,6 +16,10 @@ import com.connectly.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -125,14 +129,23 @@ public class CommentServiceImpl implements CommentService {
     ) {
 
         Comment comment = commentRepository
-                .findByIdAndPostIdAndAuthorEmail(
-                        commentId,
-                        postId,
-                        authorEmail
-                )
+                .findByIdAndPostId(commentId, postId)
                 .orElseThrow(() -> new PostNotFoundException(
                         "Comment not found"
                 ));
+
+        boolean isCommentAuthor = comment.getAuthor()
+                .getEmail()
+                .equals(authorEmail);
+
+        boolean isPostAuthor = comment.getPost()
+                .getAuthor()
+                .getEmail()
+                .equals(authorEmail);
+
+        if (!isCommentAuthor && !isPostAuthor) {
+            throw new PostNotFoundException("Comment not found");
+        }
 
         commentRepository.delete(comment);
     }

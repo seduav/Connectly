@@ -28,4 +28,8 @@ public interface CommentRepository
             Long postId,
             String email
     );
+
+    void deleteByPostId(Long postId);
+
+    long countByPostId(Long postId);
 }

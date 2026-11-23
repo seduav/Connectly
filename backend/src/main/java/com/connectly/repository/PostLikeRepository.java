@@ -20,4 +20,5 @@ public interface PostLikeRepository
 
     long countByPostId(Long postId);
 
+    void deleteByPostId(Long postId);
 }

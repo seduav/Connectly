@@ -5,6 +5,8 @@ import com.connectly.dto.request.RegistrationRequest;
 import com.connectly.dto.response.ProfileResponse;
 import com.connectly.dto.response.RegistrationResponse;
 import com.connectly.dto.response.UserResponse;
+import com.connectly.dto.response.CurrentUserResponse;
+import com.connectly.dto.response.UserSuggestionResponse;
 import com.connectly.entity.Profile;
 import com.connectly.entity.User;
 import com.connectly.enums.Role;
@@ -202,5 +204,34 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException(
                         "User not found"
                 ));
+    }
+
+    @Override
+    public CurrentUserResponse getCurrentUser(String email) {
+
+        User user = findUserByEmail(email);
+
+        return userMapper.toCurrentUserResponse(user);
+    }
+
+    @Override
+    public List<UserSuggestionResponse> getRandomUsers(
+            String currentUserEmail,
+            int limit
+    ) {
+
+        if (limit < 1) {
+            return List.of();
+        }
+
+        int safeLimit = Math.min(limit, 20);
+
+        return userRepository.findRandomUsers(
+                        currentUserEmail,
+                        safeLimit
+                )
+                .stream()
+                .map(userMapper::toUserSuggestionResponse)
+                .toList();
     }
 }

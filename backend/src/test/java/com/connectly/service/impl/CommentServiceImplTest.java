@@ -15,7 +15,6 @@ import com.connectly.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,7 +45,9 @@ class CommentServiceImplTest {
     private CommentServiceImpl commentService;
 
     private User user;
+    private User anotherUser;
     private Post post;
+    private Post anotherPost;
     private Comment comment;
     private CommentResponse commentResponse;
 
@@ -58,10 +59,20 @@ class CommentServiceImplTest {
         user.setUsername("testuser");
         user.setEmail("test@example.com");
 
+        anotherUser = new User();
+        anotherUser.setId(2L);
+        anotherUser.setUsername("anotheruser");
+        anotherUser.setEmail("another@example.com");
+
         post = new Post();
         post.setId(1L);
         post.setContent("Test post content");
         post.setAuthor(user);
+
+        anotherPost = new Post();
+        anotherPost.setId(2L);
+        anotherPost.setContent("Another post");
+        anotherPost.setAuthor(anotherUser);
 
         comment = new Comment();
         comment.setId(1L);
@@ -104,18 +115,11 @@ class CommentServiceImplTest {
         assertNotNull(result);
         assertEquals("Test comment", result.getContent());
 
-        ArgumentCaptor<Comment> captor =
-                ArgumentCaptor.forClass(Comment.class);
-
-        verify(commentRepository).save(captor.capture());
-
-        assertEquals(
-                "Test comment",
-                captor.getValue().getContent()
-        );
-
-        assertEquals(user, captor.getValue().getAuthor());
-        assertEquals(post, captor.getValue().getPost());
+        verify(commentRepository).save(argThat(saved ->
+                saved.getContent().equals("Test comment")
+                        && saved.getAuthor().equals(user)
+                        && saved.getPost().equals(post)
+        ));
 
         verify(commentMapper).toCommentResponse(comment);
     }
@@ -349,13 +353,10 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void deleteComment_shouldDeleteCommentSuccessfully() {
+    void deleteComment_shouldDeleteOwnCommentSuccessfully() {
 
-        when(commentRepository.findByIdAndPostIdAndAuthorEmail(
-                1L,
-                1L,
-                "test@example.com"
-        )).thenReturn(Optional.of(comment));
+        when(commentRepository.findByIdAndPostId(1L, 1L))
+                .thenReturn(Optional.of(comment));
 
         commentService.deleteComment(
                 1L,
@@ -363,31 +364,67 @@ class CommentServiceImplTest {
                 "test@example.com"
         );
 
-        verify(commentRepository)
-                .findByIdAndPostIdAndAuthorEmail(
-                        1L,
-                        1L,
-                        "test@example.com"
-                );
-
+        verify(commentRepository).findByIdAndPostId(1L, 1L);
         verify(commentRepository).delete(comment);
+    }
+
+    @Test
+    void deleteComment_shouldAllowPostOwnerToDeleteAnotherUsersComment() {
+
+        Comment anotherUsersComment = new Comment();
+        anotherUsersComment.setId(2L);
+        anotherUsersComment.setContent("Another user's comment");
+        anotherUsersComment.setAuthor(anotherUser);
+        anotherUsersComment.setPost(post);
+
+        when(commentRepository.findByIdAndPostId(2L, 1L))
+                .thenReturn(Optional.of(anotherUsersComment));
+
+        commentService.deleteComment(
+                1L,
+                2L,
+                "test@example.com"
+        );
+
+        verify(commentRepository).delete(anotherUsersComment);
     }
 
     @Test
     void deleteComment_shouldThrowExceptionWhenUserDoesNotOwnComment() {
 
-        when(commentRepository.findByIdAndPostIdAndAuthorEmail(
-                1L,
-                1L,
-                "another@example.com"
-        )).thenReturn(Optional.empty());
+        Comment anotherUsersComment = new Comment();
+        anotherUsersComment.setId(2L);
+        anotherUsersComment.setContent("Another user's comment");
+        anotherUsersComment.setAuthor(anotherUser);
+        anotherUsersComment.setPost(post);
+
+        when(commentRepository.findByIdAndPostId(2L, 1L))
+                .thenReturn(Optional.of(anotherUsersComment));
 
         assertThrows(
                 PostNotFoundException.class,
                 () -> commentService.deleteComment(
                         1L,
+                        2L,
+                        "third@example.com"
+                )
+        );
+
+        verify(commentRepository, never()).delete(any());
+    }
+
+    @Test
+    void deleteComment_shouldThrowExceptionWhenCommentBelongsToAnotherPost() {
+
+        when(commentRepository.findByIdAndPostId(2L, 1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                PostNotFoundException.class,
+                () -> commentService.deleteComment(
                         1L,
-                        "another@example.com"
+                        2L,
+                        "test@example.com"
                 )
         );
 
@@ -428,4 +465,3 @@ class CommentServiceImplTest {
         verifyNoInteractions(commentMapper);
     }
 }
-
