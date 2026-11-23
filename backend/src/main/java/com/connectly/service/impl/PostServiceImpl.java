@@ -10,6 +10,8 @@ import com.connectly.exception.UserNotFoundException;
 import com.connectly.mapper.PostMapper;
 import com.connectly.repository.PostRepository;
 import com.connectly.repository.UserRepository;
+import com.connectly.repository.CommentRepository;
+import com.connectly.repository.PostLikeRepository;
 import com.connectly.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,8 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
     private final PostMapper postMapper;
 
     @Override

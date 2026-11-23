@@ -341,27 +341,6 @@ class CommentControllerTest {
     }
 
     @Test
-    void deleteComment_shouldReturnNotFoundWhenUserDoesNotOwnComment()
-            throws Exception {
-
-        Comment comment = createComment(
-                anotherUser,
-                post,
-                "Another user's comment"
-        );
-
-        mockMvc.perform(
-                        delete(
-                                "/api/posts/{postId}/comments/{commentId}",
-                                post.getId(),
-                                comment.getId()
-                        ).with(authenticatedAs(AUTHOR_EMAIL))
-                )
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404));
-    }
-
-    @Test
     void getCommentsByPost_shouldRejectUnauthenticatedRequest()
             throws Exception {
 
@@ -443,4 +422,60 @@ class CommentControllerTest {
                 )
                 .andExpect(status().isBadRequest());
     }
+
+
+    @Test
+    void deleteComment_shouldAllowPostOwnerToDeleteAnotherUsersComment()
+            throws Exception {
+
+        Comment comment = createComment(
+                anotherUser,
+                post,
+                "Another user's comment"
+        );
+
+        mockMvc.perform(
+                        delete(
+                                "/api/posts/{postId}/comments/{commentId}",
+                                post.getId(),
+                                comment.getId()
+                        ).with(authenticatedAs(AUTHOR_EMAIL))
+                )
+                .andExpect(status().isNoContent());
+
+        assertFalse(
+                commentRepository.existsById(comment.getId())
+        );
+    }
+
+    @Test
+    void deleteComment_shouldReturnNotFoundWhenUserDoesNotOwnComment()
+            throws Exception {
+
+        User thirdUser = createUser(
+                "thirduser",
+                "thirduser@example.com"
+        );
+
+        Comment comment = createComment(
+                anotherUser,
+                post,
+                "Another user's comment"
+        );
+
+        mockMvc.perform(
+                        delete(
+                                "/api/posts/{postId}/comments/{commentId}",
+                                post.getId(),
+                                comment.getId()
+                        ).with(authenticatedAs("thirduser@example.com"))
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+
+        assertFalse(
+                !commentRepository.existsById(comment.getId())
+        );
+    }
+
 }

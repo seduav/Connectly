@@ -1,8 +1,6 @@
 package com.connectly.mapper;
 
-import com.connectly.dto.response.ProfileResponse;
-import com.connectly.dto.response.RegistrationResponse;
-import com.connectly.dto.response.UserResponse;
+import com.connectly.dto.response.*;
 import com.connectly.entity.Profile;
 import com.connectly.entity.User;
 import org.springframework.stereotype.Component;
@@ -54,6 +52,44 @@ public class UserMapper {
                 user.getEmail(),
                 user.getRole(),
                 "Registration successful"
+        );
+    }
+
+    public CurrentUserResponse toCurrentUserResponse(User user) {
+
+        if (user == null) {
+            return null;
+        }
+
+        Profile profile = user.getProfile();
+
+        return new CurrentUserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole(),
+                profile != null ? profile.getFirstName() : null,
+                profile != null ? profile.getLastName() : null,
+                profile != null ? profile.getBio() : null,
+                profile != null ? profile.getProfilePictureUrl() : null,
+                profile != null ? profile.getDateOfBirth() : null
+        );
+    }
+
+    public UserSuggestionResponse toUserSuggestionResponse(User user) {
+
+        if (user == null) {
+            return null;
+        }
+
+        Profile profile = user.getProfile();
+
+        return new UserSuggestionResponse(
+                user.getId(),
+                user.getUsername(),
+                profile != null ? profile.getFirstName() : null,
+                profile != null ? profile.getLastName() : null,
+                profile != null ? profile.getProfilePictureUrl() : null
         );
     }
 }

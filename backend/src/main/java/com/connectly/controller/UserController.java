@@ -4,6 +4,9 @@ import com.connectly.dto.request.ProfileUpdateRequest;
 import com.connectly.dto.request.RegistrationRequest;
 import com.connectly.dto.response.ProfileResponse;
 import com.connectly.dto.response.RegistrationResponse;
+import com.connectly.dto.response.CurrentUserResponse;
+import com.connectly.dto.response.UserSuggestionResponse;
+import java.util.List;
 import com.connectly.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -60,5 +63,28 @@ public class UserController {
                 );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<CurrentUserResponse> getCurrentUser(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+
+        CurrentUserResponse response =
+                userService.getCurrentUser(jwt.getSubject());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/suggestions")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<List<UserSuggestionResponse>> getRandomUsers(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+
+        return ResponseEntity.ok(
+                userService.getRandomUsers(jwt.getSubject(), 6)
+        );
     }
 }
