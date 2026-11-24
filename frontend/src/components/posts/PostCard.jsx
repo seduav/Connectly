@@ -18,7 +18,6 @@ function PostCard({
                       onPostUpdated,
                       onPostDeleted,
                   }) {
-    // Like management.
     const {
         liked,
         likesCount,
@@ -26,7 +25,6 @@ function PostCard({
         toggleLike,
     } = useLikes(post.id);
 
-    // Comment management.
     const {
         comments,
         commentsCount,
@@ -39,14 +37,14 @@ function PostCard({
         deleteComment,
     } = useComments(post.id);
 
-    // Post UI state.
     const [showPostMenu, setShowPostMenu] = useState(false);
     const [editingPost, setEditingPost] = useState(false);
-    const [postEditContent, setPostEditContent] = useState(post.content);
+    const [postEditContent, setPostEditContent] = useState(
+        post.content || ''
+    );
     const [postLoading, setPostLoading] = useState(false);
     const [postError, setPostError] = useState('');
 
-    // Comment UI state.
     const [commentsOpen, setCommentsOpen] = useState(false);
     const [commentContent, setCommentContent] = useState('');
 
@@ -56,23 +54,30 @@ function PostCard({
     const isPostAuthor =
         post.authorUsername === user?.username;
 
-    // Toggle comments.
-    async function handleToggleComments() {
-        if (!commentsOpen) {
-            setCommentsOpen(true);
-            await loadComments();
-        } else {
-            setCommentsOpen(false);
-        }
+    function isCommentAuthor(comment) {
+        return comment.authorUsername === user?.username;
     }
 
-    // Create comment.
+    function canDeleteComment(comment) {
+        return isCommentAuthor(comment) || isPostAuthor;
+    }
+
+    async function handleToggleComments() {
+        if (commentsOpen) {
+            setCommentsOpen(false);
+            return;
+        }
+
+        setCommentsOpen(true);
+        await loadComments();
+    }
+
     async function handleCreateComment(event) {
         event.preventDefault();
 
         const content = commentContent.trim();
 
-        if (!content) return;
+        if (!content || submittingComment) return;
 
         const result = await createComment(content);
 
@@ -81,7 +86,6 @@ function PostCard({
         }
     }
 
-    // Edit comment.
     function handleStartEditComment(comment) {
         setEditingCommentId(comment.id);
         setEditingContent(comment.content);
@@ -92,10 +96,7 @@ function PostCard({
 
         if (!content) return;
 
-        const result = await updateComment(
-            commentId,
-            content
-        );
+        const result = await updateComment(commentId, content);
 
         if (result) {
             setEditingCommentId(null);
@@ -108,36 +109,19 @@ function PostCard({
         setEditingContent('');
     }
 
-    // Delete comment.
     async function handleDeleteComment(commentId) {
-        if (!window.confirm('Delete this comment?')) {
-            return;
-        }
+        if (!window.confirm('Delete this comment?')) return;
 
         await deleteComment(commentId);
     }
 
-    // Comment permissions.
-    function isCommentAuthor(comment) {
-        return comment.authorUsername === user?.username;
-    }
-
-    function canDeleteComment(comment) {
-        return (
-            isCommentAuthor(comment) ||
-            isPostAuthor
-        );
-    }
-
-    // Start editing post.
     function handleStartEditPost() {
-        setPostEditContent(post.content);
+        setPostEditContent(post.content || '');
         setEditingPost(true);
         setShowPostMenu(false);
         setPostError('');
     }
 
-    // Save edited post.
     async function handleUpdatePost() {
         const content = postEditContent.trim();
 
@@ -147,33 +131,32 @@ function PostCard({
             setPostLoading(true);
             setPostError('');
 
-            await postService.updatePost(
-                post.id,
-                content
-            );
+            await postService.updatePost(post.id, content);
 
             setEditingPost(false);
             setShowPostMenu(false);
 
-            await onPostUpdated();
+            await onPostUpdated?.();
         } catch (error) {
             console.error('Unable to update post:', error);
 
             setPostError(
-                getErrorMessage(
-                    error,
-                    'Unable to update your post.'
-                )
+                getErrorMessage(error, 'Unable to update your post.')
             );
         } finally {
             setPostLoading(false);
         }
     }
 
-    // Delete post.
+    function handleCancelEditPost() {
+        setEditingPost(false);
+        setPostEditContent(post.content || '');
+        setPostError('');
+    }
+
     async function handleDeletePost() {
         const confirmed = window.confirm(
-            'Are you sure you want to delete this post? This action cannot be undone.'
+            'Are you sure you want to delete this post?'
         );
 
         if (!confirmed || postLoading) return;
@@ -184,47 +167,35 @@ function PostCard({
 
             await postService.deletePost(post.id);
 
-            await onPostDeleted();
+            await onPostDeleted?.();
         } catch (error) {
             console.error('Unable to delete post:', error);
 
             setPostError(
-                getErrorMessage(
-                    error,
-                    'Unable to delete your post.'
-                )
+                getErrorMessage(error, 'Unable to delete your post.')
             );
         } finally {
             setPostLoading(false);
         }
     }
 
-    // Cancel post editing.
-    function handleCancelEditPost() {
-        setEditingPost(false);
-        setPostEditContent(post.content);
-        setPostError('');
-    }
-
     return (
-        <article
-            className={`post-card ${
-                isPostAuthor ? 'own-post' : ''
-            }`}
-        >
+        <article className={`post-card ${isPostAuthor ? 'own-post' : ''}`}>
 
+            {/* Header */}
             <PostHeader
                 post={post}
                 isPostAuthor={isPostAuthor}
                 showPostMenu={showPostMenu}
                 onToggleMenu={() =>
-                    setShowPostMenu((current) => !current)
+                    setShowPostMenu(current => !current)
                 }
                 onEdit={handleStartEditPost}
                 onDelete={handleDeletePost}
                 postLoading={postLoading}
             />
 
+            {/* Post text and image */}
             <PostContent
                 post={post}
                 editing={editingPost}
@@ -236,18 +207,34 @@ function PostCard({
                 onCancel={handleCancelEditPost}
             />
 
+            {/* Likes count */}
+            <div className="post-engagement-summary">
+                <span>
+                    {likesCount} {likesCount === 1 ? 'like' : 'likes'}
+                </span>
+
+                <button
+                    type="button"
+                    onClick={handleToggleComments}
+                >
+                    {commentsCount} {commentsCount === 1
+                    ? 'comment'
+                    : 'comments'}
+                </button>
+            </div>
+
+            {/* Like, comment and share */}
             <PostActions
                 liked={liked}
-                likesCount={likesCount}
-                commentsCount={commentsCount}
                 likeLoading={likeLoading}
-                commentsOpen={commentsOpen}
                 onToggleLike={toggleLike}
                 onToggleComments={handleToggleComments}
+                commentsOpen={commentsOpen}
             />
 
+            {/* Comments */}
             {commentsOpen && (
-                <div className="post-content post-engagement">
+                <div className="post-comments-wrapper">
                     <CommentsSection
                         comments={comments}
                         loading={commentsLoading}
@@ -268,7 +255,6 @@ function PostCard({
                     />
                 </div>
             )}
-
         </article>
     );
 }
