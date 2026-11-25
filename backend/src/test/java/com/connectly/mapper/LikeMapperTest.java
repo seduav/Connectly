@@ -2,12 +2,14 @@ package com.connectly.mapper;
 
 import com.connectly.dto.response.LikeResponse;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class LikeMapperTest {
 
-    private final LikeMapper mapper = new LikeMapper();
+    private final LikeMapper mapper =
+            Mappers.getMapper(LikeMapper.class);
 
     @Test
     void toLikeResponse_shouldMapLikedResponse() {

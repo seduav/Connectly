@@ -4,6 +4,9 @@ import postService from '../../services/postService';
 
 import { getErrorMessage } from '../../utils/errorUtils';
 
+import { VALIDATION } from '../../constants/validationConstants';
+import { ERROR_MESSAGES } from '../../constants/messages';
+
 function CreatePostModal({ onClose, onPostCreated }) {
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(false);
@@ -15,7 +18,7 @@ function CreatePostModal({ onClose, onPostCreated }) {
         const trimmedContent = content.trim();
 
         if (!trimmedContent) {
-            setError('Please write something before publishing.');
+            setError(ERROR_MESSAGES.POST_EMPTY);
             return;
         }
 
@@ -36,7 +39,7 @@ function CreatePostModal({ onClose, onPostCreated }) {
             setError(
                 getErrorMessage(
                     err,
-                    'Unable to publish your post. Please try again.'
+                    ERROR_MESSAGES.POST_CREATE_FAILED
                 )
             );
         } finally {
@@ -82,9 +85,7 @@ function CreatePostModal({ onClose, onPostCreated }) {
 
                 <form onSubmit={handleSubmit}>
                     <div className="modal-user">
-                        <div className="brand-symbol">
-                            c.
-                        </div>
+                        <div className="brand-symbol">c.</div>
 
                         <div>
                             <strong>
@@ -104,20 +105,17 @@ function CreatePostModal({ onClose, onPostCreated }) {
                         onChange={(event) =>
                             setContent(event.target.value)
                         }
-                        maxLength={5000}
+                        maxLength={VALIDATION.POST.MAX_LENGTH}
                         autoFocus
                         disabled={loading}
                     />
 
                     <div className="character-counter">
-                        {content.length} / 5000 characters
+                        {content.length} / {VALIDATION.POST.MAX_LENGTH} characters
                     </div>
 
                     {error && (
-                        <div
-                            className="modal-error"
-                            role="alert"
-                        >
+                        <div className="modal-error" role="alert">
                             {error}
                         </div>
                     )}
@@ -125,13 +123,9 @@ function CreatePostModal({ onClose, onPostCreated }) {
                     <button
                         type="submit"
                         className="modal-submit"
-                        disabled={
-                            loading || !content.trim()
-                        }
+                        disabled={loading || !content.trim()}
                     >
-                        {loading
-                            ? 'Publishing...'
-                            : 'Share post'}
+                        {loading ? 'Publishing...' : 'Share post'}
                     </button>
                 </form>
             </div>

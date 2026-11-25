@@ -1,35 +1,56 @@
 import { useEffect, useState } from 'react';
+
 import { useAuth } from '../context/AuthContext';
 import { useOutletContext } from 'react-router-dom';
+
+import {
+    THEMES,
+    USER_ROLES,
+    ACCOUNT_STATUS,
+} from '../constants/appConstants';
+
+import { VALIDATION, VALIDATION_PATTERNS } from '../constants/validationConstants';
+
+import {
+    ERROR_MESSAGES,
+    SUCCESS_MESSAGES,
+} from '../constants/messages';
 
 function Settings() {
     const { user, updateProfile } = useAuth();
 
     const { darkMode, setDarkMode } = useOutletContext();
 
+    useEffect(() => {
+        document.title = 'Settings | Connectly';
+    }, []);
+
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
 
-    const profile = user?.profile || {};
-
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
-        bio: profile.bio || '',
-        profilePictureUrl: profile.profilePictureUrl || '',
-        dateOfBirth: profile.dateOfBirth || '',
+        bio: user?.profile?.bio || user?.bio || '',
+        profilePictureUrl:
+            user?.profile?.profilePictureUrl ||
+            user?.profilePictureUrl || '',
+        dateOfBirth:
+            user?.profile?.dateOfBirth || user?.dateOfBirth || '',
     });
 
     useEffect(() => {
         setFormData({
             firstName: user?.firstName || '',
             lastName: user?.lastName || '',
-            bio: user?.profile?.bio || '',
+            bio: user?.profile?.bio || user?.bio || '',
             profilePictureUrl:
-                user?.profile?.profilePictureUrl || '',
+                user?.profile?.profilePictureUrl ||
+                user?.profilePictureUrl || '',
             dateOfBirth:
-                user?.profile?.dateOfBirth || '',
+                user?.profile?.dateOfBirth ||
+                user?.dateOfBirth || '',
         });
     }, [user]);
 
@@ -50,24 +71,24 @@ function Settings() {
         setError('');
 
         if (!formData.firstName.trim()) {
-            setError('First name is required.');
+            setError(ERROR_MESSAGES.FIRST_NAME_REQUIRED);
             setSaving(false);
             return;
         }
 
         if (!formData.lastName.trim()) {
-            setError('Last name is required.');
+            setError(ERROR_MESSAGES.LAST_NAME_REQUIRED);
             setSaving(false);
             return;
         }
 
         if (
             formData.profilePictureUrl &&
-            !/^https?:\/\/.+/i.test(formData.profilePictureUrl)
+            !VALIDATION_PATTERNS.HTTP_URL.test(
+                formData.profilePictureUrl
+            )
         ) {
-            setError(
-                'Profile picture URL must start with http:// or https://.'
-            );
+            setError(ERROR_MESSAGES.INVALID_PROFILE_PICTURE_URL);
             setSaving(false);
             return;
         }
@@ -81,10 +102,11 @@ function Settings() {
                 dateOfBirth: formData.dateOfBirth || null,
             });
 
-            setSuccess('Profile updated successfully!');
+            setSuccess(SUCCESS_MESSAGES.PROFILE_UPDATED);
         } catch (err) {
             setError(
-                err.message || 'Failed to update your profile.'
+                err.message ||
+                ERROR_MESSAGES.PROFILE_UPDATE_FAILED
             );
         } finally {
             setSaving(false);
@@ -116,6 +138,7 @@ function Settings() {
                     <div className="section-heading">
                         <div>
                             <h2>Profile information</h2>
+
                             <p>
                                 Update your personal information.
                             </p>
@@ -136,7 +159,7 @@ function Settings() {
                                 name="firstName"
                                 value={formData.firstName}
                                 onChange={handleChange}
-                                maxLength={50}
+                                maxLength={VALIDATION.NAME.MAX_LENGTH}
                                 required
                                 disabled={saving}
                             />
@@ -152,7 +175,7 @@ function Settings() {
                                 name="lastName"
                                 value={formData.lastName}
                                 onChange={handleChange}
-                                maxLength={50}
+                                maxLength={VALIDATION.NAME.MAX_LENGTH}
                                 required
                                 disabled={saving}
                             />
@@ -167,13 +190,14 @@ function Settings() {
                                 name="bio"
                                 value={formData.bio}
                                 onChange={handleChange}
-                                maxLength={500}
+                                maxLength={VALIDATION.BIO.MAX_LENGTH}
                                 placeholder="Tell people about yourself..."
                                 disabled={saving}
                             />
 
                             <span className="character-counter">
-                                {formData.bio.length}/500 characters
+                                {formData.bio.length}/
+                                {VALIDATION.BIO.MAX_LENGTH} characters
                             </span>
 
                             <label htmlFor="profilePictureUrl">
@@ -187,7 +211,9 @@ function Settings() {
                                 name="profilePictureUrl"
                                 value={formData.profilePictureUrl}
                                 onChange={handleChange}
-                                maxLength={500}
+                                maxLength={
+                                    VALIDATION.PROFILE_PICTURE_URL.MAX_LENGTH
+                                }
                                 placeholder="https://example.com/photo.jpg"
                                 disabled={saving}
                             />
@@ -238,6 +264,7 @@ function Settings() {
                     <div className="section-heading">
                         <div>
                             <h2>Account information</h2>
+
                             <p>
                                 View your Connectly account details.
                             </p>
@@ -269,7 +296,7 @@ function Settings() {
                         <input
                             className="comment-edit-input"
                             type="text"
-                            value={user?.role || 'USER'}
+                            value={user?.role || USER_ROLES.USER}
                             readOnly
                         />
 
@@ -280,8 +307,8 @@ function Settings() {
                             type="text"
                             value={
                                 user?.enabled
-                                    ? 'Active'
-                                    : 'Disabled'
+                                    ? ACCOUNT_STATUS.ACTIVE
+                                    : ACCOUNT_STATUS.DISABLED
                             }
                             readOnly
                         />
@@ -310,6 +337,7 @@ function Settings() {
                     <div className="section-heading">
                         <div>
                             <h2>Appearance</h2>
+
                             <p>
                                 Customize your Connectly experience.
                             </p>
@@ -344,7 +372,9 @@ function Settings() {
                                 <strong>Current theme</strong>
 
                                 <span>
-                                    {darkMode ? 'Dark' : 'Light'}
+                                    {darkMode
+                                        ? THEMES.DARK
+                                        : THEMES.LIGHT}
                                 </span>
                             </div>
                         </div>

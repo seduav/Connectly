@@ -1,22 +1,20 @@
 package com.connectly.mapper;
 
 import com.connectly.dto.response.LikeResponse;
-import com.connectly.entity.PostLike;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.NullValueMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Component
-public class LikeMapper {
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.ERROR,
+        nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT
+)
+public interface LikeMapper {
 
-    public LikeResponse toLikeResponse(
+    LikeResponse toLikeResponse(
             Long postId,
             boolean liked,
             long likesCount
-    ) {
-
-        return new LikeResponse(
-                postId,
-                liked,
-                likesCount
-        );
-    }
+    );
 }

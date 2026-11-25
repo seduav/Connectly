@@ -1,0 +1,7 @@
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "bio": "Updated profile",
+  "profilePictureUrl": "https://example.com/photo.jpg",
+  "dateOfBirth": "2000-05-15"
+}

@@ -3,6 +3,8 @@ package com.connectly.controller;
 import com.connectly.entity.User;
 import com.connectly.enums.Role;
 import com.connectly.repository.UserRepository;
+import com.connectly.util.TestJsonLoader;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import java.time.Instant;
 
@@ -116,11 +117,9 @@ class AdminControllerTest {
     void updateUserStatus_shouldDisableUserForAdmin()
             throws Exception {
 
-        String request = """
-                {
-                    "enabled": false
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/admin/update-user-status.json"
+        );
 
         mockMvc.perform(put(
                         "/api/admin/users/" + userId + "/status")
@@ -144,11 +143,9 @@ class AdminControllerTest {
     void updateUserRole_shouldChangeRoleForAdmin()
             throws Exception {
 
-        String request = """
-                {
-                    "role": "ADMIN"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/admin/update-user-role.json"
+        );
 
         mockMvc.perform(put(
                         "/api/admin/users/" + userId + "/role")
@@ -195,7 +192,6 @@ class AdminControllerTest {
                                 "Authorization",
                                 "Bearer " + userToken()
                         ))
-                .andDo(print())
                 .andExpect(status().isForbidden());
     }
 

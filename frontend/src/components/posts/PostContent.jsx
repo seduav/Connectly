@@ -1,6 +1,5 @@
 import PostEditForm from './PostEditForm';
 
-
 function PostContent({
                          post,
                          editing,

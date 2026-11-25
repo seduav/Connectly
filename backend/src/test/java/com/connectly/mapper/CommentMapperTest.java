@@ -5,12 +5,14 @@ import com.connectly.entity.Comment;
 import com.connectly.entity.Post;
 import com.connectly.entity.User;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class CommentMapperTest {
 
-    private final CommentMapper mapper = new CommentMapper();
+    private final CommentMapper mapper =
+            Mappers.getMapper(CommentMapper.class);
 
     @Test
     void toCommentResponse_shouldReturnNullWhenCommentIsNull() {

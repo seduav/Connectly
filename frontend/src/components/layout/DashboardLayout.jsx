@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
 import Sidebar from './Sidebar';
 import RightSidebar from './RightSidebar';
@@ -13,24 +14,15 @@ import CreatePostModal from '../modals/CreatePostModal';
 import usePosts from '../../hooks/usePosts';
 import useSuggestions from '../../hooks/useSuggestions';
 
+import { ROUTES } from '../../constants/routeConstants';
+import { CONFIRM_MESSAGES } from '../../constants/messages';
+
 function DashboardLayout() {
     const { user, logout } = useAuth();
+    const { darkMode, setDarkMode } = useTheme();
     const navigate = useNavigate();
 
-    // Restore saved theme from localStorage.
-    const [darkMode, setDarkMode] = useState(() => {
-        return localStorage.getItem('connectly-theme') === 'dark';
-    });
-
     const [showCreatePost, setShowCreatePost] = useState(false);
-
-    // Persist theme whenever it changes.
-    useEffect(() => {
-        localStorage.setItem(
-            'connectly-theme',
-            darkMode ? 'dark' : 'light'
-        );
-    }, [darkMode]);
 
     const {
         posts,
@@ -39,14 +31,10 @@ function DashboardLayout() {
         fetchPosts,
     } = usePosts();
 
-    const {
-        suggestions,
-    } = useSuggestions();
+    const { suggestions } = useSuggestions();
 
     function handleLogout() {
-        if (
-            window.confirm('Are you sure you want to log out?')
-        ) {
+        if (window.confirm(CONFIRM_MESSAGES.LOGOUT)) {
             logout();
         }
     }
@@ -54,7 +42,7 @@ function DashboardLayout() {
     async function handlePostCreated() {
         await fetchPosts();
         setShowCreatePost(false);
-        navigate('/');
+        navigate(ROUTES.HOME);
     }
 
     return (
@@ -87,11 +75,8 @@ function DashboardLayout() {
                                 error,
                                 fetchPosts,
                                 suggestions,
-
-                                // Theme settings
                                 darkMode,
                                 setDarkMode,
-
                                 onCreatePost: () =>
                                     setShowCreatePost(true),
                             }}

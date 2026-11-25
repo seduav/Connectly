@@ -1,5 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { ROUTES } from '../../constants/routeConstants';
+
 function MobileNavigation({ onCreatePost }) {
     const navigate = useNavigate();
     const location = useLocation();
@@ -8,15 +10,17 @@ function MobileNavigation({ onCreatePost }) {
         <nav className="mobile-navigation">
             <button
                 aria-label="Home"
-                className={location.pathname === '/' ? 'active' : ''}
-                onClick={() => navigate('/')}
+                className={
+                    location.pathname === ROUTES.HOME ? 'active' : ''
+                }
+                onClick={() => navigate(ROUTES.HOME)}
             >
                 ⌂
             </button>
 
             <button
                 aria-label="Explore"
-                onClick={() => navigate('/explore')}
+                onClick={() => navigate(ROUTES.EXPLORE)}
             >
                 ⌕
             </button>
@@ -30,14 +34,14 @@ function MobileNavigation({ onCreatePost }) {
 
             <button
                 aria-label="Notifications"
-                onClick={() => navigate('/notifications')}
+                onClick={() => navigate(ROUTES.NOTIFICATIONS)}
             >
                 ♡
             </button>
 
             <button
                 aria-label="Profile"
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate(ROUTES.PROFILE)}
             >
                 ◉
             </button>

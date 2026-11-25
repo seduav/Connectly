@@ -4,6 +4,8 @@ import com.connectly.entity.Profile;
 import com.connectly.entity.User;
 import com.connectly.enums.Role;
 import com.connectly.repository.UserRepository;
+import com.connectly.util.TestJsonLoader;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,13 +134,9 @@ class ProtectedEndpointTest {
     void updateMyProfile_shouldReturnUnauthorizedWithoutToken()
             throws Exception {
 
-        String request = """
-                {
-                    "firstName": "Jane",
-                    "lastName": "Doe",
-                    "bio": "Updated profile"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/profile/update-profile.json"
+        );
 
         mockMvc.perform(put("/api/users/me/profile")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,15 +191,9 @@ class ProtectedEndpointTest {
 
         String token = generateValidToken();
 
-        String request = """
-                {
-                    "firstName": "Jane",
-                    "lastName": "Doe",
-                    "bio": "Updated profile",
-                    "profilePictureUrl": "https://example.com/photo.jpg",
-                    "dateOfBirth": "2000-05-15"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/profile/update-profile.json"
+        );
 
         mockMvc.perform(put("/api/users/me/profile")
                         .header(
@@ -276,4 +268,3 @@ class ProtectedEndpointTest {
                 .andExpect(status().isUnauthorized());
     }
 }
-

@@ -1,9 +1,13 @@
 import api from './api';
 
+import { STORAGE_KEYS } from '../constants/storageConstants';
+import { API_ENDPOINTS } from '../constants/apiConstants';
+import { ERROR_MESSAGES } from '../constants/messages';
+
 const authService = {
     async register(userData) {
         const response = await api.post(
-            '/users/register',
+            API_ENDPOINTS.REGISTER,
             userData
         );
 
@@ -12,40 +16,45 @@ const authService = {
 
     async login(credentials) {
         const response = await api.post(
-            '/auth/login',
+            API_ENDPOINTS.LOGIN,
             credentials
         );
 
         const { accessToken } = response.data;
 
+        if (!accessToken) {
+            throw new Error(
+                ERROR_MESSAGES.AUTHENTICATION_FAILED
+            );
+        }
+
         localStorage.setItem(
-            'connectly_token',
+            STORAGE_KEYS.AUTH_TOKEN,
             accessToken
         );
 
         return response.data;
     },
 
-    // Retrieve complete authenticated user information.
     async getCurrentUser() {
-        const response = await api.get('/users/me');
-
-        return response.data;
-    },
-
-    // Retrieve profile information.
-    async getProfile() {
         const response = await api.get(
-            '/users/me/profile'
+            API_ENDPOINTS.CURRENT_USER
         );
 
         return response.data;
     },
 
-    // Update profile information.
+    async getProfile() {
+        const response = await api.get(
+            API_ENDPOINTS.MY_PROFILE
+        );
+
+        return response.data;
+    },
+
     async updateProfile(profileData) {
         const response = await api.put(
-            '/users/me/profile',
+            API_ENDPOINTS.MY_PROFILE,
             profileData
         );
 
@@ -53,7 +62,9 @@ const authService = {
     },
 
     logout() {
-        localStorage.removeItem('connectly_token');
+        localStorage.removeItem(
+            STORAGE_KEYS.AUTH_TOKEN
+        );
     },
 };
 

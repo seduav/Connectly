@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 
 import Avatar from '../components/common/Avatar';
@@ -15,6 +16,10 @@ function Profile() {
     } = useOutletContext();
 
     const { username } = useParams();
+
+    useEffect(() => {
+        document.title = 'Profile | Connectly';
+    }, []);
 
     // Find the profile being viewed
     const profileUser =
