@@ -2,31 +2,17 @@ package com.connectly.mapper;
 
 import com.connectly.dto.response.PostResponse;
 import com.connectly.entity.Post;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Component
-public class PostMapper {
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.ERROR
+)
+public interface PostMapper {
 
-    public PostResponse toPostResponse(Post post) {
-
-        if (post == null) {
-            return null;
-        }
-
-        PostResponse response = new PostResponse();
-
-        response.setId(post.getId());
-        response.setContent(post.getContent());
-        response.setCreatedAt(post.getCreatedAt());
-        response.setUpdatedAt(post.getUpdatedAt());
-
-        if (post.getAuthor() != null) {
-            response.setAuthorId(post.getAuthor().getId());
-            response.setAuthorUsername(
-                    post.getAuthor().getUsername()
-            );
-        }
-
-        return response;
-    }
+    @Mapping(target = "authorId", source = "author.id")
+    @Mapping(target = "authorUsername", source = "author.username")
+    PostResponse toPostResponse(Post post);
 }

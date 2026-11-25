@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 
 import Avatar from '../components/common/Avatar';
@@ -5,6 +6,10 @@ import { getInitials } from '../utils/userUtils';
 
 function Explore() {
     const { suggestions } = useOutletContext();
+
+    useEffect(() => {
+        document.title = 'Explore | Connectly';
+    }, []);
 
     return (
         <section className="page-section">

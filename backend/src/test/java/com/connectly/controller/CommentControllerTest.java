@@ -7,11 +7,13 @@ import com.connectly.enums.Role;
 import com.connectly.repository.CommentRepository;
 import com.connectly.repository.PostRepository;
 import com.connectly.repository.UserRepository;
+import com.connectly.util.TestJsonLoader;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
@@ -119,11 +121,9 @@ class CommentControllerTest {
     @Test
     void createComment_shouldReturnCreated() throws Exception {
 
-        String request = """
-                {
-                    "content": "My first comment"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/comments/create-comment.json"
+        );
 
         mockMvc.perform(
                         post("/api/posts/{postId}/comments", post.getId())
@@ -197,11 +197,9 @@ class CommentControllerTest {
                 "Original comment"
         );
 
-        String request = """
-                {
-                    "content": "Updated comment"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/comments/update-comment.json"
+        );
 
         mockMvc.perform(
                         put(
@@ -320,11 +318,9 @@ class CommentControllerTest {
                 "Another user's comment"
         );
 
-        String request = """
-                {
-                    "content": "Attempted unauthorized update"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/comments/update-comment.json"
+        );
 
         mockMvc.perform(
                         put(
@@ -354,11 +350,9 @@ class CommentControllerTest {
     void createComment_shouldRejectUnauthenticatedRequest()
             throws Exception {
 
-        String request = """
-                {
-                    "content": "Unauthenticated comment"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/comments/create-comment.json"
+        );
 
         mockMvc.perform(
                         post("/api/posts/{postId}/comments", post.getId())
@@ -405,10 +399,10 @@ class CommentControllerTest {
         );
 
         String request = """
-            {
-                "content": "   "
-            }
-            """;
+                {
+                    "content": "   "
+                }
+                """;
 
         mockMvc.perform(
                         put(
@@ -422,7 +416,6 @@ class CommentControllerTest {
                 )
                 .andExpect(status().isBadRequest());
     }
-
 
     @Test
     void deleteComment_shouldAllowPostOwnerToDeleteAnotherUsersComment()
@@ -452,7 +445,7 @@ class CommentControllerTest {
     void deleteComment_shouldReturnNotFoundWhenUserDoesNotOwnComment()
             throws Exception {
 
-        User thirdUser = createUser(
+        createUser(
                 "thirduser",
                 "thirduser@example.com"
         );
@@ -477,5 +470,4 @@ class CommentControllerTest {
                 !commentRepository.existsById(comment.getId())
         );
     }
-
 }

@@ -3,6 +3,8 @@ package com.connectly.controller;
 import com.connectly.entity.User;
 import com.connectly.enums.Role;
 import com.connectly.repository.UserRepository;
+import com.connectly.util.TestJsonLoader;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,12 +49,9 @@ class AuthenticationControllerTest {
 
         createTestUser();
 
-        String request = """
-                {
-                    "email": "login@example.com",
-                    "password": "Password123"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/auth/login-valid.json"
+        );
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,12 +68,9 @@ class AuthenticationControllerTest {
 
         createTestUser();
 
-        String request = """
-                {
-                    "email": "login@example.com",
-                    "password": "WrongPassword"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/auth/login-invalid-password.json"
+        );
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,12 +85,9 @@ class AuthenticationControllerTest {
     void login_shouldReturnUnauthorizedWhenEmailDoesNotExist()
             throws Exception {
 
-        String request = """
-                {
-                    "email": "unknown@example.com",
-                    "password": "Password123"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/auth/login-unknown-email.json"
+        );
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -107,12 +100,9 @@ class AuthenticationControllerTest {
     void login_shouldReturnBadRequestWhenRequestIsInvalid()
             throws Exception {
 
-        String request = """
-                {
-                    "email": "invalid-email",
-                    "password": ""
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/auth/login-invalid-request.json"
+        );
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +111,6 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.validationErrors").exists());
     }
-
 
     @Test
     void login_shouldReturnUnauthorizedWhenAccountIsDisabled()
@@ -138,12 +127,9 @@ class AuthenticationControllerTest {
 
         userRepository.save(user);
 
-        String request = """
-            {
-                "email": "disabled@example.com",
-                "password": "Password123"
-            }
-            """;
+        String request = TestJsonLoader.load(
+                "testdata/auth/login-disabled-account.json"
+        );
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -153,5 +139,4 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.message")
                         .value("Invalid email or password"));
     }
-
 }

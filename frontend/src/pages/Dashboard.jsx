@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 
 import Stories from '../components/stories/Stories';
@@ -14,6 +15,10 @@ function Dashboard() {
         suggestions,
         onCreatePost,
     } = useOutletContext();
+
+    useEffect(() => {
+        document.title = 'Home | Connectly';
+    }, []);
 
     return (
         <>

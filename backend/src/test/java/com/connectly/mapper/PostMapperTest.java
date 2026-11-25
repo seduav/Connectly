@@ -4,12 +4,14 @@ import com.connectly.dto.response.PostResponse;
 import com.connectly.entity.Post;
 import com.connectly.entity.User;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PostMapperTest {
 
-    private final PostMapper mapper = new PostMapper();
+    private final PostMapper mapper =
+            Mappers.getMapper(PostMapper.class);
 
     @Test
     void toPostResponse_shouldReturnNullWhenPostIsNull() {

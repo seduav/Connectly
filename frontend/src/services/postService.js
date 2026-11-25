@@ -1,29 +1,44 @@
 import api from './api';
 
+import { API_ENDPOINTS } from '../constants/apiConstants';
+
 const postService = {
     async getAllPosts() {
-        const response = await api.get('/posts');
+        const response = await api.get(
+            API_ENDPOINTS.POSTS
+        );
+
         return response.data;
     },
 
     async getPostById(postId) {
-        const response = await api.get(`/posts/${postId}`);
+        const response = await api.get(
+            `${API_ENDPOINTS.POSTS}/${postId}`
+        );
+
         return response.data;
     },
 
     async getPostsByUser(userId) {
-        const response = await api.get(`/posts/user/${userId}`);
+        const response = await api.get(
+            `${API_ENDPOINTS.POSTS}/user/${userId}`
+        );
+
         return response.data;
     },
 
     async createPost(content) {
-        const response = await api.post('/posts', { content });
+        const response = await api.post(
+            API_ENDPOINTS.POSTS,
+            { content }
+        );
+
         return response.data;
     },
 
     async updatePost(postId, content) {
         const response = await api.put(
-            `/posts/${postId}`,
+            `${API_ENDPOINTS.POSTS}/${postId}`,
             { content }
         );
 
@@ -31,7 +46,9 @@ const postService = {
     },
 
     async deletePost(postId) {
-        await api.delete(`/posts/${postId}`);
+        await api.delete(
+            `${API_ENDPOINTS.POSTS}/${postId}`
+        );
     },
 };
 

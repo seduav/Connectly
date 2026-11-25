@@ -1,7 +1,9 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import Avatar from '../common/Avatar';
 import { getInitials } from '../../utils/userUtils';
+
+import { ROUTES, getProfileRoute } from '../../constants/routeConstants';
 
 function Sidebar({
                      user,
@@ -14,16 +16,20 @@ function Sidebar({
     const location = useLocation();
 
     const navigation = [
-        { label: 'Home', icon: '⌂', path: '/' },
-        { label: 'Explore', icon: '⌕', path: '/explore' },
+        { label: 'Home', icon: '⌂', path: ROUTES.HOME },
+        { label: 'Explore', icon: '⌕', path: ROUTES.EXPLORE },
         {
             label: 'Notifications',
             icon: '♡',
-            path: '/notifications',
+            path: ROUTES.NOTIFICATIONS,
         },
-        { label: 'Messages', icon: '✉', path: '/messages' },
-        { label: 'Profile', icon: '◉', path: `/profile/${user?.username}` },
-        { label: 'Settings', icon: '⚙', path: '/settings' },
+        { label: 'Messages', icon: '✉', path: ROUTES.MESSAGES },
+        {
+            label: 'Profile',
+            icon: '◉',
+            path: getProfileRoute(user?.username || ''),
+        },
+        { label: 'Settings', icon: '⚙', path: ROUTES.SETTINGS },
     ];
 
     return (
@@ -33,10 +39,11 @@ function Sidebar({
                 <span>connectly</span>
             </div>
 
-            {/* Current user profile */}
             <div
                 className="sidebar-profile"
-                onClick={() => navigate(`/profile/${user?.username}`)}
+                onClick={() =>
+                    navigate(getProfileRoute(user?.username || ''))
+                }
                 style={{ cursor: 'pointer' }}
             >
                 <Avatar
@@ -65,8 +72,10 @@ function Sidebar({
                         key={item.label}
                         className={`nav-item ${
                             location.pathname === item.path ||
-                            (item.label === 'Profile' &&
-                                location.pathname.startsWith('/profile'))
+                            (
+                                item.label === 'Profile' &&
+                                location.pathname.startsWith(ROUTES.PROFILE)
+                            )
                                 ? 'active'
                                 : ''
                         }`}

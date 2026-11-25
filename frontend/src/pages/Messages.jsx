@@ -1,4 +1,10 @@
+import { useEffect } from 'react';
+
 function Messages() {
+    useEffect(() => {
+        document.title = 'Messages | Connectly';
+    }, []);
+
     return (
         <section className="page-section">
             <div className="welcome-heading">

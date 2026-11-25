@@ -1,15 +1,19 @@
 import api from './api';
 
-const userService = {
+import { API_ENDPOINTS } from '../constants/apiConstants';
 
+const userService = {
     async getMyProfile() {
-        const response = await api.get('/users/me/profile');
+        const response = await api.get(
+            API_ENDPOINTS.MY_PROFILE
+        );
+
         return response.data;
     },
 
     async updateMyProfile(profileData) {
         const response = await api.put(
-            '/users/me/profile',
+            API_ENDPOINTS.MY_PROFILE,
             profileData
         );
 
@@ -17,7 +21,10 @@ const userService = {
     },
 
     async getSuggestions() {
-        const response = await api.get('/users/suggestions');
+        const response = await api.get(
+            API_ENDPOINTS.USER_SUGGESTIONS
+        );
+
         return response.data;
     },
 };

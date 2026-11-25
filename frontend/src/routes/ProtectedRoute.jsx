@@ -1,5 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
+
+import { ROUTES } from '../constants/routeConstants';
+import { UI_MESSAGES } from '../constants/messages';
 
 function ProtectedRoute({ allowedRoles }) {
     const { user, loading, isAuthenticated } = useAuth();
@@ -8,20 +12,20 @@ function ProtectedRoute({ allowedRoles }) {
         return (
             <div className="route-loading">
                 <div className="loading-spinner" />
-                <p>Loading Connectly...</p>
+                <p>{UI_MESSAGES.LOADING}</p>
             </div>
         );
     }
 
     if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to={ROUTES.LOGIN} replace />;
     }
 
     if (
         allowedRoles &&
         !allowedRoles.includes(user?.role)
     ) {
-        return <Navigate to="/" replace />;
+        return <Navigate to={ROUTES.HOME} replace />;
     }
 
     return <Outlet />;

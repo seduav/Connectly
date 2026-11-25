@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -23,18 +26,18 @@ class UserControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    private String readJson(String filename) throws Exception {
+        ClassPathResource resource = new ClassPathResource(
+                "testdata/users/" + filename
+        );
+
+        return resource.getContentAsString(StandardCharsets.UTF_8);
+    }
+
     @Test
     void registerUser_shouldReturnCreated() throws Exception {
 
-        String request = """
-                {
-                    "username": "controlleruser",
-                    "email": "controller@example.com",
-                    "password": "Password123",
-                    "firstName": "John",
-                    "lastName": "Smith"
-                }
-                """;
+        String request = readJson("register-user.json");
 
         mockMvc.perform(post("/api/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -49,22 +52,13 @@ class UserControllerTest {
                         .value("USER"))
                 .andExpect(jsonPath("$.message")
                         .value("Registration successful"));
-
     }
 
     @Test
     void registerUser_shouldReturnBadRequestWhenInputIsInvalid()
             throws Exception {
 
-        String request = """
-                {
-                    "username": "",
-                    "email": "invalid-email",
-                    "password": "123",
-                    "firstName": "",
-                    "lastName": ""
-                }
-                """;
+        String request = readJson("register-user-invalid.json");
 
         mockMvc.perform(post("/api/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -78,30 +72,23 @@ class UserControllerTest {
     void registerUser_shouldReturnConflictWhenEmailExists()
             throws Exception {
 
-        String request = """
-                {
-                    "username": "duplicateuser",
-                    "email": "duplicate@example.com",
-                    "password": "Password123",
-                    "firstName": "John",
-                    "lastName": "Smith"
-                }
-                """;
+        String request = readJson("register-user.json");
 
         mockMvc.perform(post("/api/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated());
 
-        String secondRequest = """
-                {
-                    "username": "anotheruser",
-                    "email": "duplicate@example.com",
-                    "password": "Password123",
-                    "firstName": "Jane",
-                    "lastName": "Smith"
-                }
-                """;
+        String secondRequest = request.replace(
+                "controlleruser",
+                "anotheruser"
+        ).replace(
+                "controller@example.com",
+                "controller@example.com"
+        ).replace(
+                "John",
+                "Jane"
+        );
 
         mockMvc.perform(post("/api/users/register")
                         .contentType(MediaType.APPLICATION_JSON)

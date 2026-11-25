@@ -1,11 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+
+import { ROUTES } from '../constants/routeConstants';
+import { VALIDATION } from '../constants/validationConstants';
+import {
+    ERROR_MESSAGES,
+    SUCCESS_MESSAGES,
+} from '../constants/messages';
+
 import './Auth.css';
 
 function Register() {
     const navigate = useNavigate();
     const { register } = useAuth();
+    const { darkMode, setDarkMode } = useTheme();
+
+    useEffect(() => {
+        document.title = 'Register | Connectly';
+    }, []);
 
     const [formData, setFormData] = useState({
         username: '',
@@ -30,12 +45,19 @@ function Register() {
 
     async function handleSubmit(event) {
         event.preventDefault();
+
         setError('');
         setSuccess('');
 
-        if (formData.password.length < 8 ||
-            formData.password.length > 72) {
-            setError('Password must contain between 8 and 72 characters.');
+        if (
+            formData.password.length < VALIDATION.PASSWORD.MIN_LENGTH ||
+            formData.password.length > VALIDATION.PASSWORD.MAX_LENGTH
+        ) {
+            setError(
+                `Password must contain between ${
+                    VALIDATION.PASSWORD.MIN_LENGTH
+                } and ${VALIDATION.PASSWORD.MAX_LENGTH} characters.`
+            );
             return;
         }
 
@@ -45,14 +67,14 @@ function Register() {
             const response = await register(formData);
 
             setSuccess(
-                response.message || 'Account created successfully!'
+                response.message || SUCCESS_MESSAGES.ACCOUNT_CREATED
             );
 
-            setTimeout(() => navigate('/login'), 1500);
+            setTimeout(() => navigate(ROUTES.LOGIN), 1500);
         } catch (err) {
             setError(
                 err.response?.data?.message ||
-                'Unable to create your account. Please try again.'
+                ERROR_MESSAGES.REGISTRATION_FAILED
             );
         } finally {
             setLoading(false);
@@ -60,9 +82,33 @@ function Register() {
     }
 
     return (
-        <div className="auth-page">
+        <div
+            className={`auth-page ${
+                darkMode ? 'dark-theme' : 'light-theme'
+            }`}
+        >
             <div className="auth-decoration decoration-one" />
             <div className="auth-decoration decoration-two" />
+
+            <button
+                type="button"
+                className="auth-theme-toggle"
+                onClick={() =>
+                    setDarkMode((current) => !current)
+                }
+                aria-label={
+                    darkMode
+                        ? 'Switch to light theme'
+                        : 'Switch to dark theme'
+                }
+                title={
+                    darkMode
+                        ? 'Switch to light theme'
+                        : 'Switch to dark theme'
+                }
+            >
+                {darkMode ? '☀️' : '🌙'}
+            </button>
 
             <div className="auth-container">
                 <div className="auth-brand">
@@ -72,7 +118,7 @@ function Register() {
 
                 <div className="auth-card">
                     <div className="auth-heading">
-                        <div className="auth-icon">✿</div>
+                        <div className="auth-icon">✦</div>
 
                         <h1>Join Connectly!</h1>
 
@@ -84,82 +130,103 @@ function Register() {
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="firstName">First name</label>
+                            <label htmlFor="firstName">
+                                First name
+                            </label>
+
                             <input
                                 id="firstName"
                                 name="firstName"
                                 value={formData.firstName}
                                 onChange={handleChange}
-                                maxLength={50}
+                                maxLength={VALIDATION.NAME.MAX_LENGTH}
                                 autoComplete="given-name"
                                 required
                             />
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="lastName">Last name</label>
+                            <label htmlFor="lastName">
+                                Last name
+                            </label>
+
                             <input
                                 id="lastName"
                                 name="lastName"
                                 value={formData.lastName}
                                 onChange={handleChange}
-                                maxLength={50}
+                                maxLength={VALIDATION.NAME.MAX_LENGTH}
                                 autoComplete="family-name"
                                 required
                             />
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="username">Username</label>
+                            <label htmlFor="username">
+                                Username
+                            </label>
+
                             <input
                                 id="username"
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
-                                minLength={3}
-                                maxLength={30}
+                                minLength={VALIDATION.USERNAME.MIN_LENGTH}
+                                maxLength={VALIDATION.USERNAME.MAX_LENGTH}
                                 autoComplete="username"
                                 required
                             />
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="registerEmail">Email address</label>
+                            <label htmlFor="registerEmail">
+                                Email address
+                            </label>
+
                             <input
                                 id="registerEmail"
                                 type="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                maxLength={100}
+                                maxLength={VALIDATION.EMAIL.MAX_LENGTH}
                                 autoComplete="email"
                                 required
                             />
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="registerPassword">Password</label>
+                            <label htmlFor="registerPassword">
+                                Password
+                            </label>
+
                             <input
                                 id="registerPassword"
                                 type="password"
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                minLength={8}
-                                maxLength={72}
+                                minLength={VALIDATION.PASSWORD.MIN_LENGTH}
+                                maxLength={VALIDATION.PASSWORD.MAX_LENGTH}
                                 autoComplete="new-password"
                                 required
                             />
                         </div>
 
                         {error && (
-                            <div className="auth-error" role="alert">
+                            <div
+                                className="auth-error"
+                                role="alert"
+                            >
                                 {error}
                             </div>
                         )}
 
                         {success && (
-                            <div className="auth-success" role="status">
+                            <div
+                                className="auth-success"
+                                role="status"
+                            >
                                 {success}
                             </div>
                         )}
@@ -169,7 +236,9 @@ function Register() {
                             className="auth-submit"
                             disabled={loading || Boolean(success)}
                         >
-                            {loading ? 'Creating account...' : 'Create account'}
+                            {loading
+                                ? 'Creating account...'
+                                : 'Create account'}
                         </button>
                     </form>
 
@@ -179,7 +248,9 @@ function Register() {
 
                     <p className="auth-switch">
                         Already have an account?{' '}
-                        <Link to="/login">Sign in</Link>
+                        <Link to={ROUTES.LOGIN}>
+                            Sign in
+                        </Link>
                     </p>
                 </div>
 

@@ -7,6 +7,7 @@ import com.connectly.entity.Profile;
 import com.connectly.entity.User;
 import com.connectly.enums.Role;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDate;
 
@@ -14,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserMapperTest {
 
-    private final UserMapper userMapper = new UserMapper();
+    private final UserMapper userMapper =
+            Mappers.getMapper(UserMapper.class);
 
     @Test
     void toProfileResponse_shouldMapProfileSuccessfully() {

@@ -8,6 +8,9 @@ import {
 
 import authService from '../services/authService';
 
+import { STORAGE_KEYS } from '../constants/storageConstants';
+import { ERROR_MESSAGES } from '../constants/messages';
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -23,7 +26,9 @@ export function AuthProvider({ children }) {
     }, []);
 
     const loadUser = useCallback(async () => {
-        const token = localStorage.getItem('connectly_token');
+        const token = localStorage.getItem(
+            STORAGE_KEYS.AUTH_TOKEN
+        );
 
         if (!token) {
             setUser(null);
@@ -80,8 +85,10 @@ export function AuthProvider({ children }) {
         await authService.login(credentials);
         await loadUser();
 
-        if (!localStorage.getItem('connectly_token')) {
-            throw new Error('Authentication failed.');
+        if (!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)) {
+            throw new Error(
+                ERROR_MESSAGES.AUTHENTICATION_FAILED
+            );
         }
     };
 

@@ -1,11 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+
+import { ROUTES } from '../constants/routeConstants';
+import { VALIDATION } from '../constants/validationConstants';
+import { ERROR_MESSAGES } from '../constants/messages';
+
 import './Auth.css';
 
 function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const { darkMode, setDarkMode } = useTheme();
+
+    useEffect(() => {
+        document.title = 'Login | Connectly';
+    }, []);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -42,17 +54,17 @@ function Login() {
                 password: formData.password,
             });
 
-            navigate('/', { replace: true });
+            navigate(ROUTES.HOME, { replace: true });
         } catch (err) {
             const status = err.response?.status;
 
             if (status === 401 || status === 403) {
-                setError('Invalid email or password.');
+                setError(ERROR_MESSAGES.INVALID_CREDENTIALS);
             } else {
                 setError(
                     err.response?.data?.message ||
                     err.message ||
-                    'Unable to login. Please try again.'
+                    ERROR_MESSAGES.LOGIN_FAILED
                 );
             }
         } finally {
@@ -61,9 +73,33 @@ function Login() {
     }
 
     return (
-        <div className="auth-page">
+        <div
+            className={`auth-page ${
+                darkMode ? 'dark-theme' : 'light-theme'
+            }`}
+        >
             <div className="auth-decoration decoration-one" />
             <div className="auth-decoration decoration-two" />
+
+            <button
+                type="button"
+                className="auth-theme-toggle"
+                onClick={() =>
+                    setDarkMode((current) => !current)
+                }
+                aria-label={
+                    darkMode
+                        ? 'Switch to light theme'
+                        : 'Switch to dark theme'
+                }
+                title={
+                    darkMode
+                        ? 'Switch to light theme'
+                        : 'Switch to dark theme'
+                }
+            >
+                {darkMode ? '☀️' : '🌙'}
+            </button>
 
             <div className="auth-container">
                 <div className="auth-brand">
@@ -85,7 +121,9 @@ function Login() {
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="email">Email address</label>
+                            <label htmlFor="email">
+                                Email address
+                            </label>
 
                             <input
                                 id="email"
@@ -94,24 +132,32 @@ function Login() {
                                 placeholder="you@example.com"
                                 value={formData.email}
                                 onChange={handleChange}
-                                maxLength={100}
+                                maxLength={VALIDATION.EMAIL.MAX_LENGTH}
                                 autoComplete="email"
                                 required
                             />
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="password">Password</label>
+                            <label htmlFor="password">
+                                Password
+                            </label>
 
                             <div className="password-input">
                                 <input
                                     id="password"
-                                    type={showPassword ? 'text' : 'password'}
+                                    type={
+                                        showPassword
+                                            ? 'text'
+                                            : 'password'
+                                    }
                                     name="password"
                                     placeholder="Enter your password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    maxLength={72}
+                                    maxLength={
+                                        VALIDATION.PASSWORD.MAX_LENGTH
+                                    }
                                     autoComplete="current-password"
                                     required
                                 />
@@ -120,7 +166,9 @@ function Login() {
                                     type="button"
                                     className="password-toggle"
                                     onClick={() =>
-                                        setShowPassword((current) => !current)
+                                        setShowPassword(
+                                            (current) => !current
+                                        )
                                     }
                                     aria-label={
                                         showPassword
@@ -134,7 +182,10 @@ function Login() {
                         </div>
 
                         {error && (
-                            <div className="auth-error" role="alert">
+                            <div
+                                className="auth-error"
+                                role="alert"
+                            >
                                 {error}
                             </div>
                         )}
@@ -144,7 +195,9 @@ function Login() {
                             className="auth-submit"
                             disabled={loading}
                         >
-                            {loading ? 'Signing in...' : 'Sign in'}
+                            {loading
+                                ? 'Signing in...'
+                                : 'Sign in'}
                         </button>
                     </form>
 
@@ -154,7 +207,9 @@ function Login() {
 
                     <p className="auth-switch">
                         Don't have an account?{' '}
-                        <Link to="/register">Create account</Link>
+                        <Link to={ROUTES.REGISTER}>
+                            Create account
+                        </Link>
                     </p>
                 </div>
 

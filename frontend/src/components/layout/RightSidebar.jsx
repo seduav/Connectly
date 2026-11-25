@@ -1,8 +1,15 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import Avatar from '../common/Avatar';
 
-import { Link } from 'react-router-dom';
+import {
+    ROUTES,
+    getProfileRoute,
+} from '../../constants/routeConstants';
+
+import { UI_MESSAGES } from '../../constants/messages';
+import { APP_CONFIG } from '../../constants/appConstants';
 
 function RightSidebar({ user, suggestions = [] }) {
     const [following, setFollowing] = useState([]);
@@ -17,10 +24,8 @@ function RightSidebar({ user, suggestions = [] }) {
 
     return (
         <aside className="right-sidebar">
-
-            {/* Current user */}
             <Link
-                to={`/profile/${user?.username}`}
+                to={getProfileRoute(user?.username || '')}
                 className="current-user"
                 style={{
                     textDecoration: 'none',
@@ -29,7 +34,11 @@ function RightSidebar({ user, suggestions = [] }) {
                 }}
             >
                 <Avatar
-                    initials={`${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`.toUpperCase() || 'U'}
+                    initials={
+                        `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`
+                            .toUpperCase() ||
+                        APP_CONFIG.DEFAULT_AVATAR_INITIALS
+                    }
                     color="lavender"
                     size="large"
                 />
@@ -43,16 +52,14 @@ function RightSidebar({ user, suggestions = [] }) {
                 </div>
             </Link>
 
-            {/* Suggestions heading */}
             <div className="suggestions-heading">
                 <span>Suggested for you</span>
 
-                <Link to="/explore" className="text-button">
+                <Link to={ROUTES.EXPLORE} className="text-button">
                     See all
                 </Link>
             </div>
 
-            {/* Suggested users */}
             <div className="suggestions-list">
                 {suggestions.map((suggestedUser) => (
                     <div
@@ -60,7 +67,7 @@ function RightSidebar({ user, suggestions = [] }) {
                         key={suggestedUser.username}
                     >
                         <Link
-                            to={`/profile/${suggestedUser.username}`}
+                            to={getProfileRoute(suggestedUser.username)}
                             className="suggestion-profile"
                             style={{
                                 display: 'flex',
@@ -75,8 +82,9 @@ function RightSidebar({ user, suggestions = [] }) {
                             <Avatar
                                 initials={
                                     suggestedUser.initials ||
-                                    `${suggestedUser.firstName?.[0] || ''}${suggestedUser.lastName?.[0] || ''}`.toUpperCase() ||
-                                    'U'
+                                    `${suggestedUser.firstName?.[0] || ''}${suggestedUser.lastName?.[0] || ''}`
+                                        .toUpperCase() ||
+                                    APP_CONFIG.DEFAULT_AVATAR_INITIALS
                                 }
                                 color="lavender"
                             />
@@ -107,11 +115,10 @@ function RightSidebar({ user, suggestions = [] }) {
                 ))}
 
                 {suggestions.length === 0 && (
-                    <p>No suggestions available.</p>
+                    <p>{UI_MESSAGES.NO_SUGGESTIONS}</p>
                 )}
             </div>
 
-            {/* Community card */}
             <div className="community-card">
                 <div className="community-icon">✦</div>
 
@@ -123,26 +130,26 @@ function RightSidebar({ user, suggestions = [] }) {
                 </p>
             </div>
 
-            {/* Footer */}
             <footer className="right-footer">
-                <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '5px 10px',
-                }}>
-                    <Link to="/about">About</Link>
-                    <Link to="/help">Help</Link>
-                    <Link to="/privacy">Privacy</Link>
-                    <Link to="/terms">Terms</Link>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '5px 10px',
+                    }}
+                >
+                    <Link to={ROUTES.ABOUT}>About</Link>
+                    <Link to={ROUTES.HELP}>Help</Link>
+                    <Link to={ROUTES.PRIVACY}>Privacy</Link>
+                    <Link to={ROUTES.TERMS}>Terms</Link>
                 </div>
 
                 <div style={{ marginTop: '10px' }}>
                     Made with ♡
                     <br />
-                    CONNECTLY © 2026
+                    {APP_CONFIG.NAME.toUpperCase()} © {APP_CONFIG.COPYRIGHT_YEAR}
                 </div>
             </footer>
-
         </aside>
     );
 }

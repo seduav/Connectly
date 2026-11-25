@@ -5,6 +5,8 @@ import com.connectly.entity.User;
 import com.connectly.enums.Role;
 import com.connectly.repository.PostRepository;
 import com.connectly.repository.UserRepository;
+import com.connectly.util.TestJsonLoader;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,11 +97,9 @@ class PostControllerTest {
     @Test
     void createPost_shouldReturnCreated() throws Exception {
 
-        String request = """
-                {
-                    "content": "My first Connectly post"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/posts/create-post.json"
+        );
 
         mockMvc.perform(post("/api/posts")
                         .with(authenticatedAs(AUTHOR_EMAIL))
@@ -171,11 +171,9 @@ class PostControllerTest {
                 "Original content"
         );
 
-        String request = """
-                {
-                    "content": "Updated content"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/posts/update-post.json"
+        );
 
         mockMvc.perform(put("/api/posts/{postId}", post.getId())
                         .with(authenticatedAs(AUTHOR_EMAIL))
@@ -241,11 +239,9 @@ class PostControllerTest {
                 "Another user's post"
         );
 
-        String request = """
-                {
-                    "content": "Attempted unauthorized update"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/posts/update-post.json"
+        );
 
         mockMvc.perform(put("/api/posts/{postId}", post.getId())
                         .with(authenticatedAs(AUTHOR_EMAIL))
@@ -282,11 +278,9 @@ class PostControllerTest {
     void createPost_shouldRejectUnauthenticatedRequest()
             throws Exception {
 
-        String request = """
-                {
-                    "content": "Unauthenticated post"
-                }
-                """;
+        String request = TestJsonLoader.load(
+                "testdata/posts/create-post.json"
+        );
 
         mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
