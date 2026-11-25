@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 
 import { ROUTES } from '../constants/routeConstants';
 import { VALIDATION } from '../constants/validationConstants';
@@ -54,9 +54,7 @@ function Register() {
             formData.password.length > VALIDATION.PASSWORD.MAX_LENGTH
         ) {
             setError(
-                `Password must contain between ${
-                    VALIDATION.PASSWORD.MIN_LENGTH
-                } and ${VALIDATION.PASSWORD.MAX_LENGTH} characters.`
+                `Password must contain between ${VALIDATION.PASSWORD.MIN_LENGTH} and ${VALIDATION.PASSWORD.MAX_LENGTH} characters.`
             );
             return;
         }
@@ -82,30 +80,16 @@ function Register() {
     }
 
     return (
-        <div
-            className={`auth-page ${
-                darkMode ? 'dark-theme' : 'light-theme'
-            }`}
-        >
+        <div className={`auth-page ${darkMode ? 'dark-theme' : 'light-theme'}`}>
             <div className="auth-decoration decoration-one" />
             <div className="auth-decoration decoration-two" />
 
             <button
                 type="button"
                 className="auth-theme-toggle"
-                onClick={() =>
-                    setDarkMode((current) => !current)
-                }
-                aria-label={
-                    darkMode
-                        ? 'Switch to light theme'
-                        : 'Switch to dark theme'
-                }
-                title={
-                    darkMode
-                        ? 'Switch to light theme'
-                        : 'Switch to dark theme'
-                }
+                onClick={() => setDarkMode((current) => !current)}
+                aria-label={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
+                title={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
             >
                 {darkMode ? '☀️' : '🌙'}
             </button>
@@ -119,9 +103,7 @@ function Register() {
                 <div className="auth-card">
                     <div className="auth-heading">
                         <div className="auth-icon">✦</div>
-
                         <h1>Join Connectly!</h1>
-
                         <p>
                             Your community is waiting.
                             Create an account and start connecting.
@@ -130,10 +112,7 @@ function Register() {
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="firstName">
-                                First name
-                            </label>
-
+                            <label htmlFor="firstName">First name</label>
                             <input
                                 id="firstName"
                                 name="firstName"
@@ -146,10 +125,7 @@ function Register() {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="lastName">
-                                Last name
-                            </label>
-
+                            <label htmlFor="lastName">Last name</label>
                             <input
                                 id="lastName"
                                 name="lastName"
@@ -162,10 +138,7 @@ function Register() {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="username">
-                                Username
-                            </label>
-
+                            <label htmlFor="username">Username</label>
                             <input
                                 id="username"
                                 name="username"
@@ -179,10 +152,7 @@ function Register() {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="registerEmail">
-                                Email address
-                            </label>
-
+                            <label htmlFor="registerEmail">Email address</label>
                             <input
                                 id="registerEmail"
                                 type="email"
@@ -196,10 +166,7 @@ function Register() {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="registerPassword">
-                                Password
-                            </label>
-
+                            <label htmlFor="registerPassword">Password</label>
                             <input
                                 id="registerPassword"
                                 type="password"
@@ -214,19 +181,13 @@ function Register() {
                         </div>
 
                         {error && (
-                            <div
-                                className="auth-error"
-                                role="alert"
-                            >
+                            <div className="auth-error" role="alert">
                                 {error}
                             </div>
                         )}
 
                         {success && (
-                            <div
-                                className="auth-success"
-                                role="status"
-                            >
+                            <div className="auth-success" role="status">
                                 {success}
                             </div>
                         )}
@@ -236,9 +197,7 @@ function Register() {
                             className="auth-submit"
                             disabled={loading || Boolean(success)}
                         >
-                            {loading
-                                ? 'Creating account...'
-                                : 'Create account'}
+                            {loading ? 'Creating account...' : 'Create account'}
                         </button>
                     </form>
 
@@ -248,9 +207,7 @@ function Register() {
 
                     <p className="auth-switch">
                         Already have an account?{' '}
-                        <Link to={ROUTES.LOGIN}>
-                            Sign in
-                        </Link>
+                        <Link to={ROUTES.LOGIN}>Sign in</Link>
                     </p>
                 </div>
 

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 
 import { ROUTES } from '../constants/routeConstants';
 import { VALIDATION } from '../constants/validationConstants';
@@ -73,30 +73,16 @@ function Login() {
     }
 
     return (
-        <div
-            className={`auth-page ${
-                darkMode ? 'dark-theme' : 'light-theme'
-            }`}
-        >
+        <div className={`auth-page ${darkMode ? 'dark-theme' : 'light-theme'}`}>
             <div className="auth-decoration decoration-one" />
             <div className="auth-decoration decoration-two" />
 
             <button
                 type="button"
                 className="auth-theme-toggle"
-                onClick={() =>
-                    setDarkMode((current) => !current)
-                }
-                aria-label={
-                    darkMode
-                        ? 'Switch to light theme'
-                        : 'Switch to dark theme'
-                }
-                title={
-                    darkMode
-                        ? 'Switch to light theme'
-                        : 'Switch to dark theme'
-                }
+                onClick={() => setDarkMode((current) => !current)}
+                aria-label={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
+                title={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
             >
                 {darkMode ? '☀️' : '🌙'}
             </button>
@@ -110,9 +96,7 @@ function Login() {
                 <div className="auth-card">
                     <div className="auth-heading">
                         <div className="auth-icon">✦</div>
-
                         <h1>Welcome back!</h1>
-
                         <p>
                             Your people are waiting.
                             Sign in to continue connecting.
@@ -121,10 +105,7 @@ function Login() {
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="email">
-                                Email address
-                            </label>
-
+                            <label htmlFor="email">Email address</label>
                             <input
                                 id="email"
                                 type="email"
@@ -139,25 +120,17 @@ function Login() {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="password">
-                                Password
-                            </label>
+                            <label htmlFor="password">Password</label>
 
                             <div className="password-input">
                                 <input
                                     id="password"
-                                    type={
-                                        showPassword
-                                            ? 'text'
-                                            : 'password'
-                                    }
+                                    type={showPassword ? 'text' : 'password'}
                                     name="password"
                                     placeholder="Enter your password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    maxLength={
-                                        VALIDATION.PASSWORD.MAX_LENGTH
-                                    }
+                                    maxLength={VALIDATION.PASSWORD.MAX_LENGTH}
                                     autoComplete="current-password"
                                     required
                                 />
@@ -165,16 +138,8 @@ function Login() {
                                 <button
                                     type="button"
                                     className="password-toggle"
-                                    onClick={() =>
-                                        setShowPassword(
-                                            (current) => !current
-                                        )
-                                    }
-                                    aria-label={
-                                        showPassword
-                                            ? 'Hide password'
-                                            : 'Show password'
-                                    }
+                                    onClick={() => setShowPassword((current) => !current)}
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                                 >
                                     {showPassword ? 'Hide' : 'Show'}
                                 </button>
@@ -182,10 +147,7 @@ function Login() {
                         </div>
 
                         {error && (
-                            <div
-                                className="auth-error"
-                                role="alert"
-                            >
+                            <div className="auth-error" role="alert">
                                 {error}
                             </div>
                         )}
@@ -195,9 +157,7 @@ function Login() {
                             className="auth-submit"
                             disabled={loading}
                         >
-                            {loading
-                                ? 'Signing in...'
-                                : 'Sign in'}
+                            {loading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </form>
 
