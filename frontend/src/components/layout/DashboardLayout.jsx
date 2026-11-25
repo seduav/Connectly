@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
 
 import Sidebar from './Sidebar';
 import RightSidebar from './RightSidebar';
@@ -46,11 +46,7 @@ function DashboardLayout() {
     }
 
     return (
-        <div
-            className={`app-shell ${
-                darkMode ? 'dark-theme' : 'light-theme'
-            }`}
-        >
+        <div className={`app-shell ${darkMode ? 'dark-theme' : 'light-theme'}`}>
             <Sidebar
                 user={user}
                 darkMode={darkMode}
@@ -77,8 +73,7 @@ function DashboardLayout() {
                                 suggestions,
                                 darkMode,
                                 setDarkMode,
-                                onCreatePost: () =>
-                                    setShowCreatePost(true),
+                                onCreatePost: () => setShowCreatePost(true),
                             }}
                         />
                     </div>

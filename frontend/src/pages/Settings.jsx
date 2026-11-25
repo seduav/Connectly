@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useOutletContext } from 'react-router-dom';
 
 import {
@@ -9,27 +9,18 @@ import {
     ACCOUNT_STATUS,
 } from '../constants/appConstants';
 
-import { VALIDATION, VALIDATION_PATTERNS } from '../constants/validationConstants';
+import {
+    VALIDATION,
+    VALIDATION_PATTERNS,
+} from '../constants/validationConstants';
 
 import {
     ERROR_MESSAGES,
     SUCCESS_MESSAGES,
 } from '../constants/messages';
 
-function Settings() {
-    const { user, updateProfile } = useAuth();
-
-    const { darkMode, setDarkMode } = useOutletContext();
-
-    useEffect(() => {
-        document.title = 'Settings | Connectly';
-    }, []);
-
-    const [saving, setSaving] = useState(false);
-    const [success, setSuccess] = useState('');
-    const [error, setError] = useState('');
-
-    const [formData, setFormData] = useState({
+function createInitialFormData(user) {
+    return {
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
         bio: user?.profile?.bio || user?.bio || '',
@@ -37,22 +28,19 @@ function Settings() {
             user?.profile?.profilePictureUrl ||
             user?.profilePictureUrl || '',
         dateOfBirth:
-            user?.profile?.dateOfBirth || user?.dateOfBirth || '',
-    });
+            user?.profile?.dateOfBirth ||
+            user?.dateOfBirth || '',
+    };
+}
 
-    useEffect(() => {
-        setFormData({
-            firstName: user?.firstName || '',
-            lastName: user?.lastName || '',
-            bio: user?.profile?.bio || user?.bio || '',
-            profilePictureUrl:
-                user?.profile?.profilePictureUrl ||
-                user?.profilePictureUrl || '',
-            dateOfBirth:
-                user?.profile?.dateOfBirth ||
-                user?.dateOfBirth || '',
-        });
-    }, [user]);
+function ProfileSettingsForm({ user, updateProfile }) {
+    const [formData, setFormData] = useState(
+        () => createInitialFormData(user)
+    );
+
+    const [saving, setSaving] = useState(false);
+    const [success, setSuccess] = useState('');
+    const [error, setError] = useState('');
 
     function handleChange(event) {
         const { name, value } = event.target;
@@ -114,6 +102,132 @@ function Settings() {
     }
 
     return (
+        <section className="stories-section">
+            <div className="section-heading">
+                <div>
+                    <h2>Profile information</h2>
+                    <p>Update your personal information.</p>
+                </div>
+            </div>
+
+            <form onSubmit={handleSaveProfile}>
+                <div className="post-edit-form">
+                    <label htmlFor="firstName">First name</label>
+
+                    <input
+                        id="firstName"
+                        className="comment-edit-input"
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        maxLength={VALIDATION.NAME.MAX_LENGTH}
+                        required
+                        disabled={saving}
+                    />
+
+                    <label htmlFor="lastName">Last name</label>
+
+                    <input
+                        id="lastName"
+                        className="comment-edit-input"
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        maxLength={VALIDATION.NAME.MAX_LENGTH}
+                        required
+                        disabled={saving}
+                    />
+
+                    <label htmlFor="bio">Bio</label>
+
+                    <textarea
+                        id="bio"
+                        className="create-post-textarea"
+                        name="bio"
+                        value={formData.bio}
+                        onChange={handleChange}
+                        maxLength={VALIDATION.BIO.MAX_LENGTH}
+                        placeholder="Tell people about yourself..."
+                        disabled={saving}
+                    />
+
+                    <span className="character-counter">
+                        {formData.bio.length}/
+                        {VALIDATION.BIO.MAX_LENGTH} characters
+                    </span>
+
+                    <label htmlFor="profilePictureUrl">
+                        Profile picture URL
+                    </label>
+
+                    <input
+                        id="profilePictureUrl"
+                        className="comment-edit-input"
+                        type="url"
+                        name="profilePictureUrl"
+                        value={formData.profilePictureUrl}
+                        onChange={handleChange}
+                        maxLength={
+                            VALIDATION.PROFILE_PICTURE_URL.MAX_LENGTH
+                        }
+                        placeholder="https://example.com/photo.jpg"
+                        disabled={saving}
+                    />
+
+                    <label htmlFor="dateOfBirth">
+                        Date of birth
+                    </label>
+
+                    <input
+                        id="dateOfBirth"
+                        className="comment-edit-input"
+                        type="date"
+                        name="dateOfBirth"
+                        value={formData.dateOfBirth}
+                        onChange={handleChange}
+                        max={new Date().toISOString().split('T')[0]}
+                        disabled={saving}
+                    />
+                </div>
+
+                {error && (
+                    <p className="interaction-error" role="alert">
+                        {error}
+                    </p>
+                )}
+
+                {success && (
+                    <p className="comments-status" role="status">
+                        ✓ {success}
+                    </p>
+                )}
+
+                <button
+                    type="submit"
+                    className="modal-submit"
+                    disabled={saving}
+                >
+                    {saving
+                        ? 'Saving changes...'
+                        : 'Save profile changes'}
+                </button>
+            </form>
+        </section>
+    );
+}
+
+function Settings() {
+    const { user, updateProfile } = useAuth();
+
+    const { darkMode, setDarkMode } = useOutletContext();
+
+    useEffect(() => {
+        document.title = 'Settings | Connectly';
+    }, []);
+
+    return (
         <div>
             <div className="welcome-heading">
                 <div>
@@ -131,132 +245,13 @@ function Settings() {
             </div>
 
             <div className="posts-list">
-
                 {/* PROFILE SETTINGS */}
 
-                <section className="stories-section">
-                    <div className="section-heading">
-                        <div>
-                            <h2>Profile information</h2>
-
-                            <p>
-                                Update your personal information.
-                            </p>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handleSaveProfile}>
-                        <div className="post-edit-form">
-
-                            <label htmlFor="firstName">
-                                First name
-                            </label>
-
-                            <input
-                                id="firstName"
-                                className="comment-edit-input"
-                                type="text"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                maxLength={VALIDATION.NAME.MAX_LENGTH}
-                                required
-                                disabled={saving}
-                            />
-
-                            <label htmlFor="lastName">
-                                Last name
-                            </label>
-
-                            <input
-                                id="lastName"
-                                className="comment-edit-input"
-                                type="text"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                maxLength={VALIDATION.NAME.MAX_LENGTH}
-                                required
-                                disabled={saving}
-                            />
-
-                            <label htmlFor="bio">
-                                Bio
-                            </label>
-
-                            <textarea
-                                id="bio"
-                                className="create-post-textarea"
-                                name="bio"
-                                value={formData.bio}
-                                onChange={handleChange}
-                                maxLength={VALIDATION.BIO.MAX_LENGTH}
-                                placeholder="Tell people about yourself..."
-                                disabled={saving}
-                            />
-
-                            <span className="character-counter">
-                                {formData.bio.length}/
-                                {VALIDATION.BIO.MAX_LENGTH} characters
-                            </span>
-
-                            <label htmlFor="profilePictureUrl">
-                                Profile picture URL
-                            </label>
-
-                            <input
-                                id="profilePictureUrl"
-                                className="comment-edit-input"
-                                type="url"
-                                name="profilePictureUrl"
-                                value={formData.profilePictureUrl}
-                                onChange={handleChange}
-                                maxLength={
-                                    VALIDATION.PROFILE_PICTURE_URL.MAX_LENGTH
-                                }
-                                placeholder="https://example.com/photo.jpg"
-                                disabled={saving}
-                            />
-
-                            <label htmlFor="dateOfBirth">
-                                Date of birth
-                            </label>
-
-                            <input
-                                id="dateOfBirth"
-                                className="comment-edit-input"
-                                type="date"
-                                name="dateOfBirth"
-                                value={formData.dateOfBirth}
-                                onChange={handleChange}
-                                max={new Date().toISOString().split('T')[0]}
-                                disabled={saving}
-                            />
-                        </div>
-
-                        {error && (
-                            <p className="interaction-error">
-                                {error}
-                            </p>
-                        )}
-
-                        {success && (
-                            <p className="comments-status">
-                                ✓ {success}
-                            </p>
-                        )}
-
-                        <button
-                            type="submit"
-                            className="modal-submit"
-                            disabled={saving}
-                        >
-                            {saving
-                                ? 'Saving changes...'
-                                : 'Save profile changes'}
-                        </button>
-                    </form>
-                </section>
+                <ProfileSettingsForm
+                    key={user?.id || user?.username || 'profile'}
+                    user={user}
+                    updateProfile={updateProfile}
+                />
 
                 {/* ACCOUNT SETTINGS */}
 
@@ -272,7 +267,6 @@ function Settings() {
                     </div>
 
                     <div className="post-edit-form">
-
                         <label>Username</label>
 
                         <input
@@ -327,7 +321,6 @@ function Settings() {
                             }
                             readOnly
                         />
-
                     </div>
                 </section>
 
@@ -358,7 +351,7 @@ function Settings() {
                                 type="button"
                                 className="filter-button"
                                 onClick={() =>
-                                    setDarkMode(!darkMode)
+                                    setDarkMode((current) => !current)
                                 }
                             >
                                 {darkMode
@@ -380,7 +373,6 @@ function Settings() {
                         </div>
                     </div>
                 </section>
-
             </div>
         </div>
     );

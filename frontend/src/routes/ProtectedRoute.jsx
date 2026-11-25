@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 import { ROUTES } from '../constants/routeConstants';
 import { UI_MESSAGES } from '../constants/messages';

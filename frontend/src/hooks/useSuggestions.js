@@ -7,9 +7,9 @@ export default function useSuggestions() {
     const [loading, setLoading] = useState(true);
 
     const fetchSuggestions = useCallback(async () => {
-        try {
-            setLoading(true);
+        setLoading(true);
 
+        try {
             const response = await userService.getSuggestions();
 
             setSuggestions(
@@ -26,8 +26,37 @@ export default function useSuggestions() {
     }, []);
 
     useEffect(() => {
-        fetchSuggestions();
-    }, [fetchSuggestions]);
+        let ignore = false;
+
+        async function loadSuggestions() {
+            try {
+                const response = await userService.getSuggestions();
+
+                if (!ignore) {
+                    setSuggestions(
+                        Array.isArray(response) ? response : []
+                    );
+                }
+            } catch (error) {
+                if (!ignore) {
+                    console.error(
+                        'Unable to load suggestions:',
+                        error
+                    );
+                }
+            } finally {
+                if (!ignore) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadSuggestions();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
 
     return {
         suggestions,

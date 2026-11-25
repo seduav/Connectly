@@ -14,10 +14,10 @@ export default function usePosts() {
     const [error, setError] = useState('');
 
     const fetchPosts = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError('');
+        setLoading(true);
+        setError('');
 
+        try {
             const response = await postService.getAllPosts();
 
             setPosts(
@@ -36,8 +36,40 @@ export default function usePosts() {
     }, []);
 
     useEffect(() => {
-        fetchPosts();
-    }, [fetchPosts]);
+        let ignore = false;
+
+        async function loadPosts() {
+            try {
+                const response = await postService.getAllPosts();
+
+                if (!ignore) {
+                    setPosts(
+                        Array.isArray(response) ? response : []
+                    );
+                    setError('');
+                }
+            } catch (err) {
+                if (!ignore) {
+                    setError(
+                        getErrorMessage(
+                            err,
+                            'Unable to load posts. Please try again.'
+                        )
+                    );
+                }
+            } finally {
+                if (!ignore) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadPosts();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
 
     return {
         posts,
